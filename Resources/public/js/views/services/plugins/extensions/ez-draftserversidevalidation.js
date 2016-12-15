@@ -32,22 +32,26 @@ YUI.add('ez-draftserversidevalidation', function (Y) {
          */
         _parseServerFieldsErrors: function (response, serverSideErrorCallback) {
             var serverSideFieldsError = [],
-                error = response.document.ErrorMessage,
-                fieldsError = error.errorDetails ?  error.errorDetails.fields : [];
+                error,
+                fieldsError;
 
             if (serverSideErrorCallback) {
-                fieldsError.forEach(function (field) {
-                    field.errors.forEach(function (error) {
-                        var serverSideFieldErrorDetails;
+                if ( response ) {
+                    error = response.document.ErrorMessage;
+                    fieldsError = error.errorDetails ?  error.errorDetails.fields : [];
+                    fieldsError.forEach(function (field) {
+                        field.errors.forEach(function (error) {
+                            var serverSideFieldErrorDetails;
 
-                        serverSideFieldErrorDetails = new Y.eZ.FieldErrorDetails({fieldDefinitionId: field._fieldTypeId});
-                        serverSideFieldErrorDetails.parse(error);
-                        serverSideFieldsError.push(serverSideFieldErrorDetails);
+                            serverSideFieldErrorDetails = new Y.eZ.FieldErrorDetails({fieldDefinitionId: field._fieldTypeId});
+                            serverSideFieldErrorDetails.parse(error);
+                            serverSideFieldsError.push(serverSideFieldErrorDetails);
+                        });
                     });
-                });
-
+                }
                 serverSideErrorCallback(serverSideFieldsError);
             }
+
         },
     });
 });

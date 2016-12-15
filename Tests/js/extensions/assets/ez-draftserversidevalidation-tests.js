@@ -67,5 +67,43 @@ YUI.add('ez-draftserversidevalidation-tests', function (Y) {
             });
             Assert.isTrue(serverSideErrorCallbackCalled, "serverSideErrorCallback should have been called");
         },
+
+        // regression test for https://jira.ez.no/browse/EZP-26550
+        "Should handle error without response": function () {
+            var serverSideErrorCallbackCalled = false;
+
+            Y.Mock.expect(this.version, {
+                method: 'save',
+                args: [Y.Mock.Value.Object, Y.Mock.Value.Function],
+                run: function (options, callback) {
+                    callback(true, undefined);
+                },
+            });
+
+            Y.Mock.expect(this.content, {
+                method: 'save',
+                args: [Y.Mock.Value.Object, Y.Mock.Value.Function],
+                run: function (options, callback) {
+                    callback(true, undefined);
+                }
+            });
+
+            this.view.fire(this.action, {
+                formIsValid: true,
+                fields: [],
+                serverSideErrorCallback: function(serverSideErrors) {
+                    Assert.isArray(
+                        serverSideErrors,
+                        "The serverSideErrors should be an array"
+                    );
+                    Assert.areEqual(
+                        0, serverSideErrors.length,
+                        "The serverSideErrors should be an empty array"
+                    );
+                    serverSideErrorCallbackCalled = true;
+                },
+            });
+            Assert.isTrue(serverSideErrorCallbackCalled, "serverSideErrorCallback should have been called");
+        },
     };
 }, '', {requires: ['test', 'ez-fielderrordetails']});
